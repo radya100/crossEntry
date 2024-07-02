@@ -834,7 +834,7 @@ order by event_time desc;
 
 --======= Схождение данных =====
 
-with (toDate('2024-06-23')) as period
+with (toDate('2024-06-28')) as period
 select
     sou, count(), any(key)
 from
@@ -863,7 +863,7 @@ from
     (
         with
             (cityHash64(article_id, is_del)) as attr
-            , (toDate('2024-06-23')) as period
+            , (toDate('2024-06-28')) as period
         select (chequeitem_id, instance_id) as key, attr, 1 as source from service.mart_ci where d = period
         union all
         select (chequeitem_id, instance_id) as key, attr, 2 as source from dwh.chequeitems_retro where d = period
@@ -880,7 +880,7 @@ select
     , intDivOrZero(anyIf(cpu, m = 'new method')*100, anyIf(cpu, m = 'old method')) as percent_cpu
 from
 (
-    with (toDate('2024-06-23')) as period
+    with (toDate('2024-06-28')) as period
     select
         sum(memory_usage) as mem
         , sum(ProfileEvents['OSCPUVirtualTimeMicroseconds']) as cpu
@@ -918,7 +918,7 @@ from
 
 --===== необходимость дедубликации
 
-with (toDate('2024-06-25')) as period
+with (toDate('2024-06-29')) as period
 select
     uniqExact((chequeitem_id, tenant_id)) as uniq_qty
     , count() as qty
@@ -938,3 +938,10 @@ where d = period
 group by chequeitem_id, tenant_id
 having count() > 1
 order by count() desc;
+
+
+select count(), uniqExact(partition)
+from system.parts
+where database = 'dwh'
+    and table = 'bonus_slim_retro'
+    and active
