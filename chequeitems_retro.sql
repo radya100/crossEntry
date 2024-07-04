@@ -606,9 +606,10 @@ where dt_load between pb and pe;
 
 -- truncate table service.mart_ci;
 -- insert into service.mart_ci
+insert into dwh.chequeitems_daily
 with
-    toDateTime('2024-06-16 01:00:00') as pb
-    , toDateTime('2024-06-16 02:00:00') as pe
+    toDateTime('2024-07-04 11:00:00') as pb
+    , toDateTime('2024-07-04 12:00:00') as pe
     , dt_load between pb and pe as dt_where
     , rs as
     (
