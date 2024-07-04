@@ -3,7 +3,7 @@
 #cd /etc/bash_etl/ci/
 cd $(pwd)
 source ../kim.conn
-cat $host
+echo $host
 #export url="http://$user:$password@$host:8123"
 #export rows=200000
 #if [ -f ./kim.mli ]; then
