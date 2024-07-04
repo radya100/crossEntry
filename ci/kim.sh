@@ -5,6 +5,7 @@ cd $(pwd)
 source ../kim.conn
 export url="http://$user:$password@$host:8123"
 export rows=200000
+ls -l
 if [ -f ./kim.mli ]; then
         export mindt=$(<./kim.mli)
 else
