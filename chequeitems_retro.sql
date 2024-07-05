@@ -825,7 +825,8 @@ from dwh.chequeitems_daily
 group by dt_load
 order by dt_load desc;
 
-select event_time, intDiv(query_duration_ms, 60000) as min
+select event_time
+     , intDiv(query_duration_ms, 60000) as min
      , formatReadableQuantity(written_rows), query
 from system.query_log
 where event_date >= today()-1

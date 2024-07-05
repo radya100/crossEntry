@@ -1,7 +1,7 @@
 with
     toDateTime('__pb__') as pb
     , __rows__ as rows
-select max(dt_load) as maxdt
+select greatest(max(dt_load), toDateTime('__pb__')) as maxdt
 from
 (
     select
