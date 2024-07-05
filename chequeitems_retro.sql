@@ -821,16 +821,16 @@ where key_hash in
 select
     dt_load
     , count()
-from service.mart_ci
+from dwh.chequeitems_daily
 group by dt_load
 order by dt_load desc;
 
 select event_time, intDiv(query_duration_ms, 60000) as min
      , formatReadableQuantity(written_rows), query
 from system.query_log
-where event_date = today()
+where event_date >= today()-1
     and type = 'QueryFinish'
-    and query like 'insert into service.mart_ci%'
+    and query like 'insert into dwh.chequeitems_daily%'
 order by event_time desc;
 
 --======= Схождение данных =====

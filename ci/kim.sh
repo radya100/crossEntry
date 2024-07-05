@@ -3,7 +3,7 @@
 cd /etc/bash_etl/crossEntry/ci/
 source ../kim.conn
 export url="http://$user:$password@$host:8123"
-export rows=200000
+export rows=2000000
 if [ -f ./kim.mli ]; then
         export mindt=$(<./kim.mli)
 else
