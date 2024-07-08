@@ -819,7 +819,7 @@ where key_hash in
 --===== Логи загрузки =========
 
 select
-    toDate(dt) as dt_load
+    dt_load
     , count()
 from dwh.chequeitems_daily
 group by dt_load

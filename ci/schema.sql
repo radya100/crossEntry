@@ -55,8 +55,8 @@ primary key key_hash;
 
 create table stage.chi_keys on cluster basic
 (
-    key_hash UInt128 codec(DoubleDelta, ZSTD(3))
-    , related_hash UInt128 codec(DoubleDelta, ZSTD(3))
+    key_hash UInt128
+    , related_hash UInt128
     , attribute_hash UInt64 codec(ZSTD(3))
     , source_table UInt8
     , dt_load DateTime materialized now()
@@ -66,7 +66,7 @@ order by (key_hash);
 
 create table stage.chi_log on cluster basic
 (
-    key_hash UInt128 codec(DoubleDelta, ZSTD(3))
+    key_hash UInt128
     , attribute_hash UInt64 codec(ZSTD(3))
     , pb DateTime
     , pe DateTime
