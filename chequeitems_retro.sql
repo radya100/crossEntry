@@ -819,7 +819,7 @@ where key_hash in
 --===== Логи загрузки =========
 
 select
-    dt_load
+    toDate(dt) as dt_load
     , count()
 from dwh.chequeitems_daily
 group by dt_load
@@ -833,6 +833,7 @@ where event_date >= today()-1
     and type = 'QueryFinish'
     and query like 'insert into dwh.chequeitems_daily%'
 order by event_time desc;
+
 
 --======= Схождение данных =====
 
