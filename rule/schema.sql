@@ -179,4 +179,43 @@ select
     , source_table
 from null.loyalty__null__crmdata__Campaign;
 
---===> CHEQUESET_RULE_I
+--===> CHEQUESET_RULE_I 3
+drop table if exists null.mv_to_stage_rule_from_chequeset_rule_i on cluster basic;
+create materialized view null.mv_to_stage_rule_from_chequeset_rule_i on cluster basic to stage.rule as
+with 3 as source_table
+    , (toUInt128(10000000000000000000000) * instance_id)
+        + (toUInt128(100000000000000000000) * source_table)
+        + toUInt128(9223372036854775808)
+        + assumeNotNull(chequeset_rule_iId) as key_hash
+select
+    key_hash
+    , instance_id
+    , source_table
+    , 0 as is_header
+    , last_version
+    , sys_change_operation = 'D' as is_del
+    , assumeNotNull(ruleid) as rule_id
+    , assumeNotNull(chequesetid) as chequeset_id
+from null.loyalty__null__crmdata__chequeset_rule_i;
+
+drop table if exists null.mv_to_stage_rule_keys_from_chequeset_rule_i on cluster basic;
+create materialized view null.mv_to_stage_rule_keys_from_chequeset_rule_i on cluster basic to stage.rule_keys as
+with 3 as src
+    , 1 as dst
+    , (toUInt128(10000000000000000000000) * instance_id)
+        + (toUInt128(100000000000000000000) * src)
+        + toUInt128(9223372036854775808)
+        + assumeNotNull(chequeset_rule_iId) as key
+    , (toUInt128(10000000000000000000000) * instance_id)
+        + (toUInt128(100000000000000000000) * dst)
+        + toUInt128(9223372036854775808)
+        + assumeNotNull(ruleid) as key_related
+select
+    (arrayJoin([(key, key_related, src), (key_related, key, dst)]) as tup).1 as key_hash
+    , tup.2 as related_hash
+    , tup.3 as source_table
+    , cityHash64(assumeNotNull(ruleid)) as attribute_hash
+from null.loyalty__null__crmdata__chequeset_rule_i;
+
+
+--===> CHEQUESET 4
