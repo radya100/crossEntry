@@ -21,6 +21,7 @@ create table stage.rule on cluster basic
     , use_certificate UInt8
     , use_articleset UInt8
     , external_id String codec(ZSTD(3))
+    --campaign_id
 -- campaign 2
     , campaign_id Int32 codec(DoubleDelta, ZSTD(3))
     , campaign_name String codec(ZSTD(3))
@@ -67,15 +68,16 @@ create table stage.rule_log on cluster basic
 partition by toYYYYMM(dt_load)
 order by (key_hash);
 
---==> RULE
+--==> RULE 1
 drop table null.mv_to_stage_rule_from_rule on cluster basic;
 create materialized view null.mv_to_stage_rule_from_rule on cluster basic to stage.rule as
 with 1 as source_table
     , (toUInt128(10000000000000000000000) * instance_id)
         + (toUInt128(100000000000000000000) * source_table)
-        + toUInt128(9223372036854775808) as init_key
+        + toUInt128(9223372036854775808)
+        + assumeNotNull(RuleId) as key_hash
 select
-    init_key + assumeNotNull(RuleId) as key_hash
+    key_hash
     , instance_id
     , source_table
     , 1 as is_header
@@ -94,18 +96,33 @@ select
     , assumeNotNull(usecertificate) as use_certificate
     , assumeNotNull(usearticleset) as use_articleset
     , assumeNotNull(externalid) as external_id
+--campaign
+    , assumeNotNull(campaign) as campaign_id
 from null.loyalty__null__crmdata__Rule;
 -- from stage.loyalty__crmdata__Rule;
 
 drop table if exists null.mv_to_stage_rule_keys_from_rule on cluster basic;
 create materialized view null.mv_to_stage_rule_keys_from_rule on cluster basic to stage.rule_keys as
 with 1 as source_table
+    , 2 as related_table
     , (toUInt128(10000000000000000000000) * instance_id)
         + (toUInt128(100000000000000000000) * source_table)
-        + toUInt128(9223372036854775808) as init_key
+        + toUInt128(9223372036854775808)
+        + assumeNotNull(RuleId) as init_key
+    , (toUInt128(10000000000000000000000) * instance_id)
+        + (toUInt128(100000000000000000000) * related_table)
+        + toUInt128(9223372036854775808)
+        + assumeNotNull(campaign) as init_related_key
 select
-    init_key + assumeNotNull(RuleId) as key_hash
-    , init_key + assumeNotNull(campaign) as related_hash
+    (
+        arrayJoin
+        (
+            sys_change_operation = 'D'
+                ? [(init_key, init_related_key)]
+                : [(init_key, init_related_key), (init_related_key, init_key)]
+        ) as tup
+    ).1 as key_hash
+    , tup.2 as related_hash
     , cityHash64
         (
             assumeNotNull(RuleId)
@@ -125,4 +142,41 @@ select
 from null.loyalty__null__crmdata__Rule;
 -- from stage.loyalty__crmdata__Rule;
 
---===> CAMPAIGN
+--===> CAMPAIGN 2
+drop table null.mv_to_stage_rule_from_campaign on cluster basic;
+create materialized view null.mv_to_stage_rule_from_campaign on cluster basic to stage.rule as
+with 2 as source_table
+    , (toUInt128(10000000000000000000000) * instance_id)
+        + (toUInt128(100000000000000000000) * source_table)
+        + toUInt128(9223372036854775808)
+        + assumeNotNull(CampaignId) as key_hash
+select
+    key_hash
+    , instance_id
+    , source_table
+    , 1 as is_header
+    , sys_change_operation = 'D' as is_del
+    , last_version
+--campaign
+    , assumeNotNull(CampaignId) as campaign_id
+    , assumeNotNull(Name) as campaign_name
+from null.loyalty__null__crmdata__Campaign;
+
+drop table null.mv_to_stage_rule_keys_from_campaign on cluster basic;
+create materialized view null.mv_to_stage_rule_keys_from_campaign on cluster basic to stage.rule_keys as
+with 2 as source_table
+    , (toUInt128(10000000000000000000000) * instance_id)
+        + (toUInt128(100000000000000000000) * source_table)
+        + toUInt128(9223372036854775808)
+        + assumeNotNull(CampaignId) as key_hash
+select
+    key_hash
+    , key_hash as related_hash
+    , cityHash64
+        (
+            assumeNotNull(Name)
+        ) as attribute_hash
+    , source_table
+from null.loyalty__null__crmdata__Campaign;
+
+--===> CHEQUESET_RULE_I

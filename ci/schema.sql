@@ -158,7 +158,7 @@ from null.loyalty__null__loyalty__chequeitem_cur;
 
 drop table null.mv_to_stage_chi_keys_from_chequeitem on cluster basic;
 create materialized view null.mv_to_stage_chi_keys_from_chequeitem on cluster basic to stage.chi_keys as
-with 1 as source_table
+with 1 as source_table-- переделай !! Сдеоай в соответствии с EA!
     , 2 as related_table
     , (toUInt128(10000000000000000000000) * instance_id)
         + (toUInt128(100000000000000000000) * source_table)
