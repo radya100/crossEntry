@@ -202,6 +202,7 @@ drop table if exists null.mv_to_stage_rule_keys_from_chequeset_rule_i on cluster
 create materialized view null.mv_to_stage_rule_keys_from_chequeset_rule_i on cluster basic to stage.rule_keys as
 with 3 as src
     , 1 as dst
+    , 4 as dst_1
     , (toUInt128(10000000000000000000000) * instance_id)
         + (toUInt128(100000000000000000000) * src)
         + toUInt128(9223372036854775808)
@@ -210,12 +211,159 @@ with 3 as src
         + (toUInt128(100000000000000000000) * dst)
         + toUInt128(9223372036854775808)
         + assumeNotNull(ruleid) as key_related
+    , (toUInt128(10000000000000000000000) * instance_id)
+        + (toUInt128(100000000000000000000) * dst_1)
+        + toUInt128(9223372036854775808)
+        + assumeNotNull(chequesetid) as key_related_1
 select
-    (arrayJoin([(key, key_related, src), (key_related, key, dst)]) as tup).1 as key_hash
+    (
+        arrayJoin
+        (
+            sys_change_operation = 'D'
+                ? [(key, key, src)]
+                : [(key, key_related, src), (key_related, key, dst), (key, key_related_1, src), (key_related_1, key, dst_1)]
+        ) as tup
+    ).1 as key_hash
     , tup.2 as related_hash
     , tup.3 as source_table
     , cityHash64(assumeNotNull(ruleid)) as attribute_hash
 from null.loyalty__null__crmdata__chequeset_rule_i;
-
+-- from stage.loyalty__crmdata__chequeset_rule_i;
 
 --===> CHEQUESET 4
+drop table if exists null.mv_to_stage_rule_from_chequeset on cluster basic;
+create materialized view null.mv_to_stage_rule_from_chequeset on cluster basic to stage.rule as
+with 4 as source_table
+    , (toUInt128(10000000000000000000000) * instance_id)
+        + (toUInt128(100000000000000000000) * source_table)
+        + toUInt128(9223372036854775808)
+        + assumeNotNull(chequesetId) as key_hash
+select
+    key_hash
+    , instance_id
+    , source_table
+    , 0 as is_header
+    , last_version
+    , sys_change_operation = 'D' as is_del
+
+    , assumeNotNull(chequesetId) as chequeset_id
+    , assumeNotNull(useorgunit) as use_orgunit
+from null.loyalty__null__crmdata__chequeset;
+
+drop table if exists null.mv_to_stage_rule_keys_from_chequeset on cluster basic;
+create materialized view null.mv_to_stage_rule_keys_from_chequeset on cluster basic to stage.rule_keys as
+with 4 as src
+    , (toUInt128(10000000000000000000000) * instance_id)
+        + (toUInt128(100000000000000000000) * src)
+        + toUInt128(9223372036854775808)
+        + assumeNotNull(chequesetId) as key_hash
+select
+    key_hash
+    , key_hash as related_hash
+    , cityHash64(assumeNotNull(useorgunit)) as attribute_hash
+    , src as source_table
+from null.loyalty__null__crmdata__chequeset;
+
+--===> CHEQUESET_ORGUNITLIS_I 5
+drop table if exists null.mv_to_stage_rule_from_chequeset_orgunitlist_i on cluster basic;
+create materialized view null.mv_to_stage_rule_from_chequeset_orgunitlist_i on cluster basic to stage.rule as
+with 5 as source_table
+    , (toUInt128(10000000000000000000000) * instance_id)
+        + (toUInt128(100000000000000000000) * source_table)
+        + toUInt128(9223372036854775808)
+        + assumeNotNull(chequeset_orgunitlist_iId) as key_hash
+select
+    key_hash
+    , instance_id
+    , source_table
+    , 0 as is_header
+    , last_version
+    , sys_change_operation = 'D' as is_del
+    , assumeNotNull(chequesetid) as chequeset_id
+    , assumeNotNull(orgunitlistid) as orgunitlist_id
+from null.loyalty__null__crmdata__chequeset_orgunitlist_i;
+-- from stage.loyalty__crmdata__chequeset_orgunitlist_i;
+
+
+drop table if exists null.mv_to_stage_rule_keys_from_chequeset_orgunitlist_i on cluster basic;
+create materialized view null.mv_to_stage_rule_keys_from_chequeset_orgunitlist_i on cluster basic to stage.rule_keys as
+with 5 as src
+    , 4 as dst
+    , 6 as dst_1
+    , (toUInt128(10000000000000000000000) * instance_id)
+        + (toUInt128(100000000000000000000) * src)
+        + toUInt128(9223372036854775808)
+        + assumeNotNull(chequeset_orgunitlist_iId) as key
+    , (toUInt128(10000000000000000000000) * instance_id)
+        + (toUInt128(100000000000000000000) * dst)
+        + toUInt128(9223372036854775808)
+        + assumeNotNull(chequesetid) as key_related
+    , (toUInt128(10000000000000000000000) * instance_id)
+        + (toUInt128(100000000000000000000) * dst_1)
+        + toUInt128(9223372036854775808)
+        + assumeNotNull(orgunitlistid) as key_related_1
+select
+    (
+        arrayJoin
+        (
+            sys_change_operation = 'D'
+                ? [(key, key, src)]
+                : [(key, key_related, src), (key_related, key, dst), (key, key_related_1, src), (key_related_1, key, dst_1)]
+        ) as tup
+    ).1 as key_hash
+    , tup.2 as related_hash
+    , tup.3 as source_table
+    , cityHash64(
+        assumeNotNull(chequesetid)
+        , assumeNotNull(orgunitlistid)
+    ) as attribute_hash
+from null.loyalty__null__crmdata__chequeset_orgunitlist_i;
+-- from stage.loyalty__crmdata__chequeset_orgunitlist_i;
+
+
+--===> ORGUNITLIST_ORGUNIT 6
+drop table if exists null.mv_to_stage_rule_from_orgunitlist_orgunit on cluster basic;
+create materialized view null.mv_to_stage_rule_from_orgunitlist_orgunit on cluster basic to stage.rule as
+with 6 as source_table
+    , (toUInt128(10000000000000000000000) * instance_id)
+        + (toUInt128(100000000000000000000) * source_table)
+        + toUInt128(9223372036854775808)
+        + assumeNotNull(orgunitlist_orgunitId) as key_hash
+select
+    key_hash
+    , instance_id
+    , source_table
+    , 0 as is_header
+    , last_version
+    , sys_change_operation = 'D' as is_del
+    , assumeNotNull(orgunitlistid) as orgunitlist_id
+    , assumeNotNull(orgunitid) as shop_id
+from null.loyalty__null__crmdata__orgunitlist_orgunit;
+-- from stage.loyalty__crmdata__orgunitlist_orgunit;
+
+drop table if exists null.mv_to_stage_rule_keys_from_orgunitlist_orgunit on cluster basic;
+create materialized view null.mv_to_stage_rule_keys_from_orgunitlist_orgunit on cluster basic to stage.rule_keys as
+with 6 as src
+    , 5 as dst
+    , (toUInt128(10000000000000000000000) * instance_id)
+        + (toUInt128(100000000000000000000) * src)
+        + toUInt128(9223372036854775808)
+        + assumeNotNull(orgunitlist_orgunitId) as key
+    , (toUInt128(10000000000000000000000) * instance_id)
+        + (toUInt128(100000000000000000000) * dst)
+        + toUInt128(9223372036854775808)
+        + assumeNotNull(orgunitlistid) as key_related
+select
+    (
+        arrayJoin
+        (
+            sys_change_operation = 'D'
+                ? [(key, key, src)]
+                : [(key, key_related, src), (key_related, key, dst)]
+        ) as tup
+    ).1 as key_hash
+    , tup.2 as related_hash
+    , cityHash64(assumeNotNull(orgunitid)) as attribute_hash
+    , tup.3 as source_table
+from null.loyalty__null__crmdata__orgunitlist_orgunit;
+-- from stage.loyalty__crmdata__orgunitlist_orgunit;
