@@ -1,4 +1,5 @@
-insert into dwh.rule
+-- insert into dwh.rule
+insert into service.rule_del_me
 with
     toDateTime('__pb__') as pb
     , toDateTime('__pe__') as pe
@@ -81,6 +82,7 @@ select
     , s1.use_certificate
     , s1.use_articleset
     , s1.external_id
+    , greatest(s1.dt_load_, s2.dt_load_, s3.dt_load_) as dt_load
 from
 (
     select
@@ -98,6 +100,7 @@ from
         , tup.13 as use_certificate
         , tup.14 as use_articleset
         , tup.15 as external_id
+        , tup.22 as dt_load_
     from rs
     where source_table = 1
 ) as s1
@@ -107,12 +110,14 @@ any left join
         rule_id
         , a1.instance_id as instance_id
         , groupUniqArray(cityHash64(a3.shop_id, a1.instance_id)) as lists_shop_instance_hash
+        , greatest(max(a1.dt_load_), max(a2.dt_load_), max(a3.dt_load_)) as dt_load_
     from
     (
         select
             tup.1 as instance_id
             , tup.4 as rule_id
             , tup.18 as chequeset_id
+            , tup.22 as dt_load_
         from rs
         where source_table = 3
             and (chequeset_id, instance_id) in
@@ -131,6 +136,7 @@ any left join
             tup.1 as instance_id
             , tup.18 as chequeset_id
             , tup.20 as orgunitlist_id
+            , tup.22 as dt_load_
         from rs
         where source_table = 5
     ) as a2 on (a2.chequeset_id, a2.instance_id) = (a1.chequeset_id, a1.instance_id)
@@ -140,6 +146,7 @@ any left join
             tup.1 as instance_id
             , tup.20 as orgunitlist_id
             , tup.21 as shop_id
+            , tup.22 as dt_load_
         from rs
         where source_table = 6
     ) as a3 on (a3.orgunitlist_id, a3.instance_id) = (a2.orgunitlist_id, a2.instance_id)
@@ -151,6 +158,7 @@ any left join
         tup.1 as instance_id
         , tup.16 as campaign_id
         , tup.17 as campaign_name
+        , tup.22 as dt_load_
     from rs
     where source_table = 2
 ) as s3 on (s3.campaign_id, s3.instance_id) = (s1.campaign_id, s1.instance_id);
