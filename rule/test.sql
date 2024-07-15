@@ -23,7 +23,8 @@ where event_date >= today()-1
     and query like 'insert into service.rule_del_me%'
 order by event_time desc;
 
-select count() from dwh.rule ;
+truncate table stage.rule_log on cluster basic;
+select * from dwh.rule ;
 -- where tenant_id = 0;
 
 select count()
@@ -34,3 +35,5 @@ select * from stage.loyalty__crmdata__chequeset_rule_i
 where ruleid = 25;
 
 select * from stage.rule where rule_id = 25;
+
+select * from stage.rule_log

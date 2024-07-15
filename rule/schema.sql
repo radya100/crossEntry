@@ -103,9 +103,6 @@ SOURCE(CLICKHOUSE(HOST 'localhost' PORT 9000 USER 'dict_user' PASSWORD 'NUBzmHTN
 LIFETIME(MIN 1200 MAX 2400)
 LAYOUT(HASHED());
 
-system reload dictionary dwh.d_rule on cluster basic;
-select * from dwh.rule;
-
 drop table if exists dwh.rule on cluster basic;
 create table dwh.rule on cluster basic
 (
