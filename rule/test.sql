@@ -23,5 +23,14 @@ where event_date >= today()-1
     and query like 'insert into service.rule_del_me%'
 order by event_time desc;
 
-select * from dwh.rule
-where tenant_id = 0;
+select count() from dwh.rule ;
+-- where tenant_id = 0;
+
+select count()
+from service.rule_del_me; order by rule_id
+-- where toDate(dt_load) >= today()-4;
+
+select * from stage.loyalty__crmdata__chequeset_rule_i
+where ruleid = 25;
+
+select * from stage.rule where rule_id = 25;

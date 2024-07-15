@@ -1,4 +1,4 @@
-insert into service.rule_del_me
+insert into dwh.rule
 with
     toDateTime('__pb__') as pb
     , toDateTime('__pe__') as pe

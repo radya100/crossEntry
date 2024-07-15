@@ -68,6 +68,70 @@ create table stage.rule_log on cluster basic
 partition by toYYYYMM(dt_load)
 order by (key_hash);
 
+
+alter table dwh.coupon_daily on cluster basic
+    drop column charge_rule_name
+    , drop column campaign_instance_hash
+    , drop column campaign_name;
+alter table dwh.coupon_daily on cluster basic
+    add column charge_rule_name	LowCardinality(String) alias if(charge_rule_id = 0, '', dictGet('dwh.d_rule', 'rule_name', cityHash64(charge_rule_id, instance_id)))
+    , add column campaign_instance_hash	UInt64	alias multiIf(scheduled_task_id != 0, dictGet('dwh.d_schedulertask', 'campaign_instance_hash', cityHash64(scheduled_task_id, instance_id)), charge_rule_id != 0, dictGet('dwh.d_rule', 'campaign_instance_hash', cityHash64(charge_rule_id, instance_id)), dictGet('dwh.d_coupon_emission', 'campaign_instance_hash', cityHash64(emission_id, instance_id)))
+    , add column campaign_name	LowCardinality(String) alias dictGet('dwh.d_campaign', 'campaign_name', multiIf(scheduled_task_id != 0, dictGet('dwh.d_schedulertask', 'campaign_instance_hash', cityHash64(scheduled_task_id)), charge_rule_id != 0, dictGet('dwh.d_rule', 'campaign_instance_hash', cityHash64(charge_rule_id)), dictGet('dwh.d_coupon_emission', 'campaign_instance_hash', cityHash64(emission_id))));
+
+
+drop dictionary dwh.d_rule on cluster basic;
+create dictionary dwh.d_rule on cluster basic
+(
+    rule_instance_hash UInt64
+    , rule_name String
+    , campaign_name String
+    , campaign_instance_hash UInt64
+    , date_from DATE
+    , date_to DATE
+    , owner_id Int32
+    , lists_shop_instance_hash Array(UInt64)
+    , is_active UInt8
+    , bonus_type Int32
+    , use_commodity_campaign Int32
+    , use_personal_campaign UInt8
+    , use_certificate UInt8
+    , use_articleset UInt8
+    , external_id String
+)
+PRIMARY KEY rule_instance_hash
+SOURCE(CLICKHOUSE(HOST 'localhost' PORT 9000 USER 'dict_user' PASSWORD 'NUBzmHTN' DB 'dwh' TABLE 'rule'))
+LIFETIME(MIN 1200 MAX 2400)
+LAYOUT(HASHED());
+
+system reload dictionary dwh.d_rule on cluster basic;
+select * from dwh.rule;
+
+drop table if exists dwh.rule on cluster basic;
+create table dwh.rule on cluster basic
+(
+    rule_instance_hash	UInt64
+    , rule_id	Int32
+    , instance_id	UInt16
+    , rule_name	String
+    , campaign_id	Int32
+    , campaign_instance_hash	UInt64
+    , campaign_name	String
+    , tenant_id	UInt32
+    , date_from	Date
+    , date_to	Date
+    , owner_id	Int32
+    , lists_shop_instance_hash	Array(UInt64)
+    , is_active	UInt8
+    , bonus_type	Int32
+    , use_commodity_campaign	Int32
+    , use_personal_campaign	UInt8
+    , use_certificate	UInt8
+    , use_articleset	UInt8
+    , external_id	String
+    , dt_load DateTime default now()
+)  engine = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/dwh_rule', '{replica}')
+ORDER BY (tenant_id, rule_instance_hash);
+
 --==> RULE 1
 drop table null.mv_to_stage_rule_from_rule on cluster basic;
 create materialized view null.mv_to_stage_rule_from_rule on cluster basic to stage.rule as
