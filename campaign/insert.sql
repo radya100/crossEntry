@@ -42,5 +42,6 @@ select
     , tup.7 as actual_end
     , tup.8 as external_id
     , tup.9 as is_active
+    , tup.11 as dt_load
 from rs
 where source_table = 2;

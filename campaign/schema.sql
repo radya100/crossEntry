@@ -9,6 +9,7 @@ create table service.campaign_del_me on cluster basic
     , actual_end Int64
     , external_id String
     , is_active UInt8
+    , dt_load DateTime default now()
 ) engine = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/service_campaign_del_me', '{replica}')
 order by (tenant_id, campaign_instance_hash);
 
