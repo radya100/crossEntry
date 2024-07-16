@@ -14,6 +14,6 @@ from system.query_log
 where event_date >= today()-1
     and type = 'QueryFinish'
     and query like 'insert into dwh.rule%'
---     and written_rows > 0
+    and written_rows > 0
 order by event_time desc;
 
