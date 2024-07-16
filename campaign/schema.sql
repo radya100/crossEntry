@@ -13,15 +13,15 @@ order by (tenant_id, campaign_instance_hash);
 
 create table stage.campaign on cluster basic
 (
-    key_hash UInt128
+    key_hash UInt128--
     , instance_id UInt16
     , source_table UInt8
     , is_header UInt8
-    , is_del UInt8
-    , last_version Int64 codec(DoubleDelta, ZSTD(3))
+    , is_del UInt8--
+    , last_version Int64 codec(DoubleDelta, ZSTD(3))--
     , dt_load DateTime materialized now() codec(DoubleDelta, ZSTD(3))
 
-    , campaign_id Int32 codec(DoubleDelta, ZSTD(3))
+    , campaign_id Int32 codec(DoubleDelta, ZSTD(3)) --5
     , campaign_name String codec(ZSTD(3))
     , actual_start Int64 codec(DoubleDelta, ZSTD(3))
     , actual_end Int64 codec(DoubleDelta, ZSTD(3))
