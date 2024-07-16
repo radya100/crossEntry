@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cd /etc/bash_etl/crossEntry/campaign/ || return
-source ../buran.conn
+source $1
 cat $state_file
 #export url="http://$user:$password@$host:8123"
 #export rows=2000000
