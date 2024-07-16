@@ -1,4 +1,4 @@
-insert into dwh.campaign
+insert into service.campaign_del_me
 with
     toDateTime('__pb__') as pb
     , toDateTime('__pe__') as pe

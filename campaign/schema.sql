@@ -1,4 +1,5 @@
-create table dwh.campaign on cluster basic
+-- create table dwh.campaign on cluster basic
+create table service.campaign_del_me on cluster basic
 (
     campaign_instance_hash UInt64
     , campaign_id Int32
@@ -8,7 +9,7 @@ create table dwh.campaign on cluster basic
     , actual_end Int64
     , external_id String
     , is_active UInt8
-) engine = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/dwh_campaign', '{replica}')
+) engine = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/service_campaign_del_me', '{replica}')
 order by (tenant_id, campaign_instance_hash);
 
 create table stage.campaign on cluster basic
