@@ -24,6 +24,10 @@ truncate table service.campaign_del_me on cluster basic;
 
 drop table if exists dwh.campaign on cluster basic settings check_table_dependencies = 0;
 
+system reload dictionary dwh.d_campaign on cluster basic;
+
+select * from dwh.d_campaign;
+
 CREATE VIEW dwh.campaign
 (
     `campaign_instance_hash` UInt64,
