@@ -41,5 +41,3 @@ select
         ) as attribute_hash
     , source_table
 from stage.loyalty__crmdata__Campaign;
-
-select * from stage.campaign_keys
