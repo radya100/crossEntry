@@ -3,8 +3,9 @@
 select
     dt_load
     , count()
+    , uniqExact((rule_id, tenant_id))
 from dwh.rule
-group by dt_load
+group by dt_load with rollup
 order by dt_load desc;
 
 select event_time
