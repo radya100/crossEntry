@@ -130,7 +130,7 @@ select
     , toDate(dt_load) as d_load
     , get_partner(0, instance_id, organization_id, 0) as tenant_id
     , ci.ci.9 as position_number
-    , ch.ch.10 as paid_by_bonus
+    , ci.ci.10 as paid_by_bonus
     , ci.ci.11 as mcp
     , ch.pay as payment_type
     , card_attrs.2 as card_type_id
