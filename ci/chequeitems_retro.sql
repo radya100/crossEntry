@@ -826,13 +826,17 @@ group by dt_load
 order by dt_load desc;
 
 select event_time
-     , intDiv(query_duration_ms, 60000) as min
-     , formatReadableQuantity(written_rows), query
+    , intDiv(query_duration_ms, 60000) as min
+    , formatReadableQuantity(written_rows), query
+    , type
+    , exception
 from system.query_log
 where event_date >= today()-1
-    and type = 'QueryFinish'
+    and type <> 'QueryStart'
     and query like 'insert into dwh.chequeitems_daily%'
 order by event_time desc;
+
+Code: 62. DB::Exception: Syntax error: failed at position 58 (')'): ) as tup).1 as instance_id11 as pos_idpaid_by_bonusoper_type_bervice.ci_keysh])ey_hash from service.ci_keys where dt_where)per_typestance_id, get_salt(instance_. Unmatched parentheses: ). (SYNTAX_ERROR) (version 23.3.22.3 (official build))
 
 
 --======= Схождение данных =====
