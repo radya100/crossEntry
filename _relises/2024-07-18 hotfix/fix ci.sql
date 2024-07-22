@@ -1,4 +1,5 @@
 drop table service.join_pbb_del_me  on cluster basic;
+drop table service.set_pbb_del_me on cluster basic;
 
 create table service.join_pbb_del_me  on cluster basic
 (
@@ -7,57 +8,74 @@ create table service.join_pbb_del_me  on cluster basic
     , pbb Int64
 ) engine = Join(ANY, LEFT, instance_id, chequeitem_id);
 
+create table service.set_pbb_del_me on cluster basic
+(
+    instance_id UInt16
+    , chequeitem_id Int64
+) engine = Set();
+
 insert into service.join_pbb_del_me
 select
     instance_id
     , chequeitem_id
     , argMax(paid_by_bonus, last_version) as pbb
 from stage.stage_ci
-prewhere d_load >= '2024-07-01'
+prewhere d_load between '2024-06-01' and '2024-06-30'
 where source_table = 1
 group by instance_id, chequeitem_id
-having pbb <> 0
-;
+having pbb <> 0;
 
+insert into service.set_pbb_del_me
+select
+    instance_id
+    , chequeitem_id
+from stage.stage_ci
+prewhere d_load between '2024-06-01' and '2024-06-30'
+where source_table = 1
+group by instance_id, chequeitem_id
+having argMax(paid_by_bonus, last_version) <> 0;
 
 alter table dwh.chequeitems_daily  update
     paid_by_bonus = joinGet('service.join_pbb_del_me', 'pbb', instance_id, chequeitem_id)
-where ym = 202407 ;
+-- where d = '2024-05-31'
+where ym = 202406
+    and (instance_id, chequeitem_id) in service.set_pbb_del_me;
+
 
 alter table dwh.chequeitems_retro  update
     paid_by_bonus = joinGet('service.join_pbb_del_me', 'pbb', instance_id, chequeitem_id)
-where ym = 202407 ;
-
--- create table service.pbb_del_me engine = Log as
-select * except (pbb), pbb as paid_by_bonus
-from
-(
-    select
-        * except (paid_by_bonus)
-        , joinGet('service.join_pbb_del_me', 'pbb', instance_id, chequeitem_id) as pbb
-    from dwh.chequeitems_retro
-    where ym = 202407
-        and pbb <> paid_by_bonus
-) where pbb <> 0 limit 100;
+-- where d = '2024-05-31'
+where ym = 202406;
+--     and (instance_id, chequeitem_id) in service.set_pbb_del_me;
 
 
-select * from system.mutations where not is_done;
+select * from system.mutations
+where not is_done
+-- order by create_time desc ;
 
-select paid_by_bonus from service.ci where (chequeitem_id, instance_id) = (-9223372036537791365, 3) ;
+select paid_by_bonus,  joinGet('service.join_pbb_del_me', 'pbb', instance_id, chequeitem_id) as pbb
+from dwh.chequeitems_retro
+where (instance_id, chequeitem_id) not in service.set_pbb_del_me
+    and d = '2024-05-31'
+    and paid_by_bonus <> pbb
+order by paid_by_bonus desc
+;
 
 select
     d
-    , sum(paid_by_bonus)
+    , formatReadableQuantity(sum(paid_by_bonus)/100) as pbb1
+    , formatReadableQuantity(sum(joinGet('service.join_pbb_del_me', 'pbb', instance_id, chequeitem_id))/100) as pbb2
 from dwh.chequeitems_retro
-where ym = 202407
-    and tenant_id in (405, 406)
+where (ym = 202406 or d = '2024-05-31')
+    and tenant_id in (1)
+--     and (instance_id, chequeitem_id) in service.set_pbb_del_me
 group by d
 order by d desc;
 
 
 
-select * from system.zookeeper where path = '/clickhouse/tables/{shard}/chequeitems_daily_not_mat_tenant/mutations';
-select * from system.zookeeper where path = '/clickhouse/tables/{shard}/chequeitems_retro_not_mat_tenant/mutations';
+select * from system.zookeeper where path = '/clickhouse/tables/buran/chequeitems_daily_not_mat_tenant/mutations';
+select * from system.zookeeper where path = '/clickhouse/tables/buran/chequeitems_retro_not_mat_tenant/mutations';
 
 
 
