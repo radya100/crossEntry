@@ -836,6 +836,14 @@ where event_date >= today()-1
     and query like 'insert into dwh.chequeitems_daily%'
 order by event_time desc;
 
+select *
+from system.query_log
+where event_date >= today() - 1
+    and user = 'airflow_user'
+    and type <> 'QueryStart'
+    and lower(query) like 'insert into dwh.chequeitems_retro%';
+
+
 insert into dwh.chequeitems_daily last_version, not is_del) as tup).1 as instance_id11 as pos_idpaid_by_bonusoper_type_bervice.ci_keysh])ey_hash from service.ci_keys where dt_where)per_typestance_id, get_salt(instance_id)) as card_hashmeNotNull(JSONExtract(x.2, 'Tuple(Q Nullable(Float32))').1), ''), instance_id))ch.1, ci.ci.2) as is_delosition_numbery, summdisc, summ, discount, position_number, paid_by_bonus, mcp, article_external_id), source_table = 1) as cile = 51 ? 5 : 6/*, oper_type_b, parent_type*/), source_table in (51, 61)) as b_cicheque_id, campaign_id, process_dt, is_status, source_table = 52 ? 5 : 6/*, oper_type_b, parent_type*/), source_table in (52, 62)) as b_chu
 
 
@@ -951,4 +959,4 @@ select count(), uniqExact(partition)
 from system.parts
 where database = 'dwh'
     and table = 'bonus_slim_retro'
-    and active
+    and active;

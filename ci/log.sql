@@ -9,32 +9,4 @@ select
     , pb
     , pe
 from service.ci_keys
-where key_hash in
-(
-    select arrayJoin([key_hash, related_hash])
-    from service.ci_keys
-    where key_hash in
-    (
-        select arrayJoin([key_hash, related_hash])
-        from service.ci_keys
-        where key_hash in
-        (
-            select
-                arrayJoin([key_hash, related_hash])
-            from service.ci_keys
-            where key_hash in
-            (
-                select
-                    arrayJoin([key_hash, related_hash])
-                from service.ci_keys
-                where key_hash in
-                (
-                    select
-                        arrayJoin([key_hash, related_hash])
-                    from service.ci_keys
-                    where dt_where
-                )
-            )
-        )
-    )
-)
+where dt_where;
