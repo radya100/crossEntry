@@ -130,3 +130,6 @@ enable_software_prefetch_in_aggregation =1,
 allow_aggregate_partitions_independently =1,
 force_aggregate_partitions_independently =1,
 enable_writes_to_query_cache = false;
+
+
+-- qwe
