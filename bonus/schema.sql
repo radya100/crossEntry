@@ -144,5 +144,5 @@ select
         , assumeNotNull(parent_type_id) as parent_type
     ) as attribute_hash
     , tup.3 as source_table
-from null.loyalty__null__loyalty__bonus_cur;
--- from stage.loyalty__loyalty__bonus_cur limit 100;
+-- from null.loyalty__null__loyalty__bonus_cur;
+from stage.loyalty__loyalty__bonus_cur limit 100;
