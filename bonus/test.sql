@@ -14,6 +14,8 @@ where event_date = today()
     and query like '%bonus_slim_daily%';
 
 
+--добавил коммент
+
 insert into dwh.bonus_slim_daily
 (    b_instance_hash,instance_id,bonus_id,organization_id,source_table,is_delete,value,dt_created,parent_type_id,parent_id,rule_id,campaign_id,is_status,oper_type,chequeitem_id,article_id
     ,ea_ci,cheque_id,shop_id,card_id,card_hash,is_order,credit_bonus_id,dt_start_date,dt_finish_date,remainder,dt_load,cheque_summ,cheque_summdiscounted,tenant_id,ci_quantity,ci_summ,ci_summdiscounted)
