@@ -70,6 +70,8 @@ order by (key_hash);
 
 
 -->> BO
+drop table if exists null.mv_to_stage_bo_from_bonus on cluster basic;
+create materialized view null.mv_to_stage_bo_from_bonus on cluster basic to stage.bo as
 with 6 as source_table
     , (toUInt128(10000000000000000000000) * instance_id)
         + (toUInt128(100000000000000000000) * source_table)
@@ -104,7 +106,8 @@ select
 from null.loyalty__null__loyalty__bonus_cur;
 -- from stage.loyalty__loyalty__bonus_cur limit 100;
 
-
+drop table if exists null.mv_to_stage_bo_keys_from_bonus on cluster basic;
+create materialized view null.mv_to_stage_bo_keys_from_bonus on cluster basic to stage.bo_keys as
 with  6 as source_table_bo
     , 1 as source_table_ci
     , 2 as source_table_ch
@@ -141,5 +144,5 @@ select
         , assumeNotNull(parent_type_id) as parent_type
     ) as attribute_hash
     , tup.3 as source_table
--- from null.loyalty__null__loyalty__bonus_cur;
-from stage.loyalty__loyalty__bonus_cur limit 100;
+from null.loyalty__null__loyalty__bonus_cur;
+-- from stage.loyalty__loyalty__bonus_cur limit 100;
