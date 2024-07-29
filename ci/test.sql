@@ -1,9 +1,9 @@
 drop table service.reload_keys_del_me;
 create table service.reload_keys_del_me engine = Set() as
 select key_hash from (
+-- select * from (
 with
-    toDate(dt_load) between '2024-06-30' and '2024-06-30' as dt_where
---     toDate(dt_load) between '2024-07-20' and '2024-07-23' as dt_where
+    toDate(dt_load) between '2024-07-24' and '2024-07-25' as dt_where
 select
     intDiv(ins_sou, toUInt128(100)) as instance_id
     , key_hash - (ins_sou * toUInt128(100000000000000000000)) - toUInt128(9223372036854775808) as ci_id
@@ -12,16 +12,24 @@ from service.ci_keys
 where
     dt_where
     and (toUInt128(intDiv(key_hash, 100000000000000000000)) as ins_sou) - instance_id*100 = 1
-    and instance_id = 3
---     and (instance_id, ci_id) not in (select instance_id, chequeitem_id from dwh.chequeitems_retro where d between '2024-07-20' and '2024-07-24')
+--     and instance_id = 3
+    and (instance_id, ci_id) not in
+        (
+            select instance_id, chequeitem_id
+            from dwh.chequeitems_retro
+            where d between '2024-07-24' and '2024-07-26'
+            union all
+            select instance_id, chequeitem_id
+            from dwh.chequeitems_daily
+            where d between '2024-07-24' and '2024-07-26'
+        )
     and source_table = 1);
+-- where instance_id = 13 and ci_id = '-9223372034269801110'
+-- limit 100;
 
 drop table service.rs;
-create table service.rs engine = Log as
+-- create table service.rs engine = Log as
 with
---     toDateTime('__pb__') as pb
---     , toDateTime('__pe__') as pe
---     , dt_load between pb and pe as dt_where
     key_hash in service.reload_keys_del_me as dt_where
     , rs as
     (
@@ -90,12 +98,6 @@ with
                                 arrayJoin([key_hash, related_hash])
                             from service.ci_keys
                             where dt_where
---                             and (key_hash, attribute_hash) not in
---                             (
---                                 select key_hash, attribute_hash
---                                 from service.ci_log
---                                 where key_hash in (select key_hash from service.ci_keys where dt_where)
---                             )
                         )
                     )
                 )
@@ -103,7 +105,8 @@ with
         ) group by key_hash
         having instance_id and (source_table in (1, 2) or del = 0)
     )
-select * from rs;
+select * from rs
+where chequeitem_id = '-9223372034269801110';
 
 insert into dwh.chequeitems_retro
 select
@@ -236,7 +239,8 @@ where 1=1
 select * from stage.loyalty__loyalty__cheque_cur where cheque_Id = '-9223372031751392927';
 select * from stage.loyalty__loyalty__chequeitem_cur where cheque_id = '-9223372031751392927';
 
-select * from service.ci
+select dt_load, *
+from service.ci
 where instance_id = 13
     and cheque_id = '-9223372031751392927';
 
@@ -294,11 +298,3 @@ where d between '2024-07-18' and '2024-07-25'
 group by d, instance_id
 order by instance_id, d;
 
-
-    intDiv(ins_sou, toUInt128(100)) as instance_id
-    , key_hash - (ins_sou * toUInt128(100000000000000000000)) - toUInt128(9223372036854775808) as ci_id
-    , *
-from service.ci_keys
-where
-    dt_where
-    and (toUInt128(intDiv(key_hash, 100000000000000000000)) as ins_sou) - instance_id*100 = 1
