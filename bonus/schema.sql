@@ -225,3 +225,67 @@ select
     , tup.3 as source_table
 from null.loyalty__null__loyalty__bonus_wo_cur;
 -- from stage.loyalty__loyalty__bonus_wo_cur limit 100;
+
+-->> EA
+drop table if exists null.mv_to_stage_bo_from_ea on cluster basic;
+create materialized view null.mv_to_stage_bo_from_ea on cluster basic to stage.bo as
+with 3 as source_table
+    , (toUInt128(10000000000000000000000) * instance_id)
+        + (toUInt128(100000000000000000000) * source_table)
+        + toUInt128(9223372036854775808)
+        + assumeNotNull(extended_attributes_id) as key_hash
+select
+    key_hash
+    , instance_id
+    , source_table
+    , 0 as is_cheque
+    , sys_change_operation = 'D' as is_del
+    , last_version
+
+    , assumeNotNull(cheque_id) as cheque_id
+    , assumeNotNull(chequeitem_id) as chequeitem_id
+    , assumeNotNull(key) as ea_key
+    , assumeNotNull(value) as ea_value
+from null.loyalty__null__loyalty__extended_attributes_cur;
+-- from stage.loyalty__loyalty__extended_attributes_cur limit 100;
+
+drop table if exists null.mv_to_stage_bo_keys_from_ea on cluster basic;
+create materialized view null.mv_to_stage_bo_keys_from_ea on cluster basic to stage.bo_keys as
+with  3 as source_table_ea
+    , 1 as source_table_ci
+    , 2 as source_table_ch
+    , (toUInt128(10000000000000000000000) * instance_id)
+        + (toUInt128(100000000000000000000) * source_table_ea)
+        + toUInt128(9223372036854775808)
+        + assumeNotNull(extended_attributes_id) as init_key_ea
+    , (toUInt128(10000000000000000000000) * instance_id)
+        + (toUInt128(100000000000000000000) * source_table_ci)
+        + toUInt128(9223372036854775808)
+        + assumeNotNull(chequeitem_id) as init_key_ci
+    , (toUInt128(10000000000000000000000) * instance_id)
+        + (toUInt128(100000000000000000000) * source_table_ch)
+        + toUInt128(9223372036854775808)
+        + assumeNotNull(cheque_id) as init_key_ch
+select
+    (arrayJoin(
+        multiIf(
+            sys_change_operation = 'D', [(init_key_ea, init_key_ea, source_table_ea)]
+            , assumeNotNull(cheque_id) =  0 and assumeNotNull(chequeitem_id) = 0, [(init_key_ea, init_key_ea, source_table_ea)]
+            , assumeNotNull(cheque_id) <> 0 and assumeNotNull(chequeitem_id) = 0, [(init_key_ea, init_key_ch, source_table_ea), (init_key_ch, init_key_ea, source_table_ch)]
+            , [(init_key_ea, init_key_ci, source_table_ea), (init_key_ci, init_key_ea, source_table_ci), (init_key_ea, init_key_ch, source_table_ea), (init_key_ch, init_key_ea, source_table_ch)]
+        )
+    ) as tup).1 as key_hash
+    , tup.2 as related_hash
+    , cityHash64
+    (
+        assumeNotNull(cheque_id) as cheque_id
+        , assumeNotNull(chequeitem_id) as chequeitem_id
+        , assumeNotNull(key) as ea_key
+        , assumeNotNull(value) as ea_value
+    ) as attribute_hash
+    , tup.3 as source_table
+from null.loyalty__null__loyalty__extended_attributes_cur;
+-- from stage.loyalty__loyalty__extended_attributes_cur limit 100;
+
+
+

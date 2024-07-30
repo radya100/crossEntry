@@ -137,5 +137,6 @@ enable_writes_to_query_cache = false;
 -- qwe
 
 
-select distinct source_table
+select source_table
 from stage.bo_keys
+group by source_table
