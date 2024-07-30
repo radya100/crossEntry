@@ -139,4 +139,4 @@ enable_writes_to_query_cache = false;
 
 select source_table
 from stage.bo_keys
-group by source_table
+group by source_table;
