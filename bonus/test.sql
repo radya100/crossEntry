@@ -182,4 +182,9 @@ where table = 'set_bo';
 29    , cheque_summ
 30    , cheque_summdiscounted
 
-;describe table dwh.bonus_slim_retro
+;select *
+from system.query_log
+where event_date = today()
+    and user = 'airflow_user'
+    and type not in ('QueryStart', 'QueryFinish')
+order by event_time desc

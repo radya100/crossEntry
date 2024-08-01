@@ -4,7 +4,7 @@ cd /etc/bash_etl/crossEntry/bonus/ || return
 source $1
 export url="http://$user:$password@$host:8123"
 # shellcheck disable=SC2091
-$(cat ./data_select.sql | curl $url --data-binary @-) #| $(cat ./data_insert.sql | curl $url -sS -d @-)
+cat ./data_select.sql | curl $url -sS -d @- #| $(cat ./data_insert.sql | curl $url -sS -d @-)
 #export rows=2000000
 #if [ -f $state_file ]; then
 #        export mindt=$(<$state_file)
