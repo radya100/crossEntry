@@ -2,7 +2,7 @@ select
     name, type
 from system.columns
 where database = 'dwh'
-    and table = 'bonus_slim_retro'
+    and table = 'bonus_slim_daily'
     and default_kind not in ('MATERIALIZED', 'ALIAS')
 order by position;
 
@@ -140,3 +140,46 @@ enable_writes_to_query_cache = false;
 select source_table
 from stage.bo_keys
 group by source_table;
+
+select formatReadableSize(total_bytes), * from system.tables
+where table = 'set_bo';
+
+
+
+1    , instance_id
+2    , source_table
+3    , is_header
+31    , dt_load
+-->> bonus
+4    , bonus_id
+5    , credit_bonus_id
+6    , organization_id
+7    , value Int64
+8    , dt_created
+9   , parent_type_id
+10   , parent_id
+11   , rule_id
+12    , campaign_id
+13    , is_status
+14    , oper_type
+15    , dt_start_date
+16    , dt_finish_date
+17    , is_order
+18    , remainder
+-->> CI
+19    , chequeitem_id
+20    , article_id
+21    , ci_quantity
+22    , ci_summ
+23    , ci_summdiscounted
+-->> EA_CI
+24    , ea_key
+25    , ea_value
+-->> CH
+26    , cheque_id
+27    , shop_id
+28    , card_id
+29    , cheque_summ
+30    , cheque_summdiscounted
+
+;describe table dwh.bonus_slim_retro

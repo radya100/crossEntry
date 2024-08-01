@@ -1,11 +1,11 @@
 create table stage.bo on cluster basic
 (
-    key_hash UInt128
+    key_hash UInt128 --
     , instance_id UInt16
     , source_table UInt8
     , is_header UInt8
-    , is_del	UInt8
-    , last_version Int64 codec(DoubleDelta, ZSTD(3))
+    , is_del	UInt8 --
+    , last_version Int64 codec(DoubleDelta, ZSTD(3)) --
     , dt_load DateTime materialized now() codec(DoubleDelta, ZSTD(3))
 -->> bonus
     , bonus_id Int64 codec(DoubleDelta, ZSTD(3))
@@ -344,7 +344,7 @@ select
 from null.loyalty__null__loyalty__chequeitem_cur;
 -- from stage.loyalty__loyalty__chequeitem_cur limit 100;
 
---> CР
+--> CH
 drop table if exists null.mv_to_stage_bo_from_ch on cluster basic;
 create materialized view null.mv_to_stage_bo_from_ch on cluster basic to stage.bo as
 with 2 as source_table

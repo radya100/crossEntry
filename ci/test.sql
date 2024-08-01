@@ -3,32 +3,38 @@ create table service.reload_keys_del_me engine = Set() as
 select key_hash from (
 -- select * from (
 with
-    toDate(dt_load) between '2024-07-24' and '2024-07-25' as dt_where
+    toDate(dt_load) between '2024-07-24' and '2024-07-26' as dt_where
+--     , ci_id in ('-9223372034269801110', '-9223372034269801112', '-9223372034269801111') as ci_where
+    , toUInt128(100000000000000000000) as bc
+    , toUInt128(10000000000000000000000) as bbc
 select
-    intDiv(ins_sou, toUInt128(100)) as instance_id
-    , key_hash - (ins_sou * toUInt128(100000000000000000000)) - toUInt128(9223372036854775808) as ci_id
+    intDiv(key_hash, bbc) as instance_id
+--     , key_hash - (intDiv(key_hash, bc) * bc) - toUInt128(9223372036854775808) as ci_id
+    , key_hash - instance_id * bbc - bc - toUInt128(9223372036854775808) as ci_id
     , *
+    , dt_load
 from service.ci_keys
 where
     dt_where
-    and (toUInt128(intDiv(key_hash, 100000000000000000000)) as ins_sou) - instance_id*100 = 1
---     and instance_id = 3
+--     and ci_where
     and (instance_id, ci_id) not in
         (
             select instance_id, chequeitem_id
             from dwh.chequeitems_retro
-            where d between '2024-07-24' and '2024-07-26'
+            where d between '2024-07-24' and '2024-07-27'
             union all
             select instance_id, chequeitem_id
             from dwh.chequeitems_daily
-            where d between '2024-07-24' and '2024-07-26'
+            where d between '2024-07-24' and '2024-07-27'
         )
     and source_table = 1);
 -- where instance_id = 13 and ci_id = '-9223372034269801110'
 -- limit 100;
 
+
+
 drop table service.rs;
--- create table service.rs engine = Log as
+create table service.rs engine = Log as
 with
     key_hash in service.reload_keys_del_me as dt_where
     , rs as
@@ -105,8 +111,9 @@ with
         ) group by key_hash
         having instance_id and (source_table in (1, 2) or del = 0)
     )
-select * from rs
-where chequeitem_id = '-9223372034269801110';
+select * from rs settings max_memory_usage = '40G';
+-- where chequeitem_id in (-9223372034269801110, -9223372034269801112, -9223372034269801111);
+-- where chequeitem_id = '-9223372034269801110';
 
 insert into dwh.chequeitems_retro
 select
@@ -193,14 +200,6 @@ semi left join
 ) as ch on ch.cheque_id = ci.ci.1 and ch.instance_id = ci.instance_id
 settings max_memory_usage = '30G';
 
-
-select distinct
-    partition
-from system.parts
-where database = 'dwh'
-    and table = 'chequeitems_retro'
-    and cast(partition ,'Tuple(UInt64, UInt64)').2 = 202407;
-
 optimize table dwh.chequeitems_retro partition (13,202407) final;
 optimize table dwh.chequeitems_retro partition (1703,202407) final;
 optimize table dwh.chequeitems_retro partition (301,202407) final;
@@ -230,71 +229,22 @@ where not is_del
 group by tenant_id
 order by tenant_id;
 
-select *
-from dwh.chequeitems_retro
-where 1=1
---     and tenant_id = 13
-    and cheque_id = '-9223372031751392927';
-
-select * from stage.loyalty__loyalty__cheque_cur where cheque_Id = '-9223372031751392927';
-select * from stage.loyalty__loyalty__chequeitem_cur where cheque_id = '-9223372031751392927';
-
-select dt_load, *
-from service.ci
-where instance_id = 13
-    and cheque_id = '-9223372031751392927';
-
-
-select * from service.ci_keys
-where  key_hash = '130200000000005103389153';
-
-select *
-from service.ci_log
-where key_hash = '130200000000005103389153';
-
-select * from system.detached_parts
-where database = 'dwh'
-    and table = 'chequeitems_daily';
-
-SELECT *,
-       concat('alter table ',database,'.',table,' drop detached part ''',a.name,''' settings allow_drop_detached=1;') as drop
-FROM system.detached_parts a
-ALL LEFT JOIN
-(SELECT database, table, partition_id, name, active, min_block_number, max_block_number
-   FROM system.parts WHERE active
-) b
-USING (database, table, partition_id)
-WHERE a.min_block_number >= b.min_block_number
-  AND a.max_block_number <= b.max_block_number
-ORDER BY table, min_block_number, max_block_number;
-
-select * from system.part_log
-where event_date >= today() - 1
-    and database = 'dwh'
-    and table = 'chequeitems_daily';
-
-
-select
-    intDiv(toUInt128(intDiv(key_hash, 100000000000000000000)), toUInt128(100)) as ins, count()
-from service.ci_log
-where toDate(dt_load) = '2024-07-24'
-    and key_hash not in
-        (
-            select (toUInt128(10000000000000000000000) * instance_id)
-                + (toUInt128(100000000000000000000) )
-                + toUInt128(9223372036854775808)
-                + toUInt128(chequeitem_id) as init_key_ci
-            from dwh.chequeitems_retro where d >= '2024-07-24'
-        )
-group by ins
-order by ins;
 
 select
     d
     , instance_id
-    , formatReadableQuantity(count())
+    , formatReadableQuantity(count()) as qty
+    , formatReadableQuantity(sum(summdisc)/100) as summdisc
 from dwh.chequeitems_retro
-where d between '2024-07-18' and '2024-07-25'
+where d between '2024-07-22' and '2024-07-26'
+    and instance_id = 13
 group by d, instance_id
 order by instance_id, d;
+
+select * from dwh.chequeitems_retro
+where chequeitem_id in (-9223372034269801110, -9223372034269801112, -9223372034269801111);
+
+select *
+from service.ci
+where chequeitem_id in (-9223372034269801110, -9223372034269801112, -9223372034269801111)
 
