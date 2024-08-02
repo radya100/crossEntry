@@ -1,0 +1,1 @@
+select max(dt_load) as mli from dwh.bonus_slim_retro;

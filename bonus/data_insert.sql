@@ -1,1 +1,0 @@
-?query=insert%20into%20service.qwe20format%20Values

@@ -193,6 +193,7 @@ with rs as(    select        (argMaxIf(tuple(* except (key_hash, is_del, last_ve
 
 ;create table service.qwe engine = Log() as select * from dwh.bonus_slim_retro limit 0;
 select * from service.qwe;
+truncate table service.qwe;
 
 select *
 from system.query_log
