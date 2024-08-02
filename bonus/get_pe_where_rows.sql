@@ -6,7 +6,7 @@ from
 (
     select
         dt_load
-    from stage.campaign_keys
+    from stage.bo_keys
     where dt_load > pb
     order by dt_load
     limit rows
