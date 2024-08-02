@@ -18,7 +18,7 @@ export pe=$(echo $pe_query | curl $url -sS -d @-)
 echo $(cat ./data_prepare_keys.sql | sed "s/__pb__/$pb/g" | sed "s/__pe__/$pe/") | curl $url -sS -d @-
 
 #calculate showcase
-export msg=$(echo $(<./data_select.sql) | curl $url -sS -d @- | curl $url2 -sS -d @-)
+export msg=$(echo $(<./data_select.sql) | curl $url -sS -d @- | curl --write-out '%{http_code}' --output /dev/null --silent $url2 -d @-)
 
 if [[ "$msg" == "200" ]]; then
         echo $pe>$state_file
