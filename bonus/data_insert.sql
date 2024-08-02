@@ -1,4 +1,4 @@
-insert into dwh.bonus_slim_retro
+insert into service.qwe
 (
     b_instance_hash
     , instance_id
@@ -38,4 +38,4 @@ insert into dwh.bonus_slim_retro
     , ci_quantity
     , ci_summ
     , ci_summdiscounted
-) format Native
+) format TSVWithNames
