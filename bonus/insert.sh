@@ -3,7 +3,7 @@
 cd /etc/bash_etl/crossEntry/bonus/ || return
 source $1
 export url="http://$user:$password@$host:8123"
-export url2="http://$user:$password@$host:8123?query=insert%20into%20service.qwe%20format%20Values"
+export url2="$url?query=insert%20into%20service.qwe%20format%20Values"
 echo $(<./data_select.sql) | curl $url -sS -d @- | curl $url2 -sS -d @-
 #if [ -f $state_file ]; then
 #        export mindt=$(<$state_file)
