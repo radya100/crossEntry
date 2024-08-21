@@ -3,7 +3,7 @@
 cd /etc/bash_etl/crossEntry/bonus/ || return
 # shellcheck source=../buran.conn
 source "$1"
-url="http://$(user):$(password)@$(host):8123"
+url="http://$user:$password@$host:8123"
 url2="$url?query=insert%20into%20service.qwe%20format%20Values"
 export rows=2000000
 if [ -f "$(state_file)" ]; then
