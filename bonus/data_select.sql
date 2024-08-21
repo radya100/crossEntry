@@ -35,7 +35,7 @@ select
     , s2.tup_ch.1 as shop_id
     , cityHash64(shop_id, instance_id) as shop_instance_hash
     , get_partner(0, instance_id, organization_id, 0) as tenant_id
-    , s2.tup_ch.2 as card_id
+    , s1.tup.28 as card_id
     , cityHash64(card_id, instance_id, get_salt(instance_id)) as card_hash
     , cityHash64(card_id, instance_id) as card_instance_hash
     , s1.tup.17 as is_order

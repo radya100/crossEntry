@@ -1,19 +1,11 @@
 select
     name, type
 from system.columns
-where database = 'dwh'
-    and table = 'bonus_slim_daily'
+where database = 'stage'
+    and table = 'bo'
     and default_kind not in ('MATERIALIZED', 'ALIAS')
+    and name not in ('key_hash', 'is_del', 'last_version')
 order by position;
-
-select *
-from system.query_log
-where event_date = today()
-    and user = 'airflow_user'
-    and type <> 'QueryStart'
-    and query like '%bonus_slim_daily%';
-
-
 --добавил коммент
 
 insert into dwh.bonus_slim_daily
@@ -134,23 +126,14 @@ force_aggregate_partitions_independently =1,
 enable_writes_to_query_cache = false;
 
 
--- qwe
-
-
-select source_table
-from stage.bo_keys
-group by source_table;
-
 select formatReadableSize(total_bytes), * from system.tables
 where table = 'set_bo';
 
-;create table service.qwe engine = Log() as select * from dwh.bonus_slim_retro limit 0;
-select * from service.qwe; --3665535
 
 select pb, pe, formatReadableQuantity(count())
 from stage.bo_log
 group by pb, pe
-order by pb;
+order by pb desc;
 
 select formatReadableSize(result_bytes), *
 from system.query_log
@@ -165,44 +148,8 @@ order by event_time desc;
 show processlist;
 
 
-select key_hash, count()
+select count()
 from stage.bo
-where key_hash in stage.set_bo --105 097 066
-group by key_hash
-order by count() desc
-limit 100
-;
-
-select * from stage.bo where key_hash = '50200000000000016513049';
+where key_hash in stage.set_bo;
 
 
-with toDateTime('2024-08-02 11:33:01') as pb
-    , 2000000 as rows
-select greatest(max(dt_load), toDateTime('2024-08-02 11:33:01')) as maxdt
-from
-(
-    select
-        dt_load
-    from stage.bo_keys
-    where dt_load > pb
-    order by dt_load
-    limit rows
-);
-
-
-with toDateTime('2024-08-02 11:33:01') as pb
-    , 2000000 as rows
-    , 100 as dates
-select
-    *
-from stage.bo_keys
-where dt_load in
-(
-    select
-        dt_load
-    from stage.bo_keys
-    where dt_load > pb
-    group by dt_load
-    order by dt_load
-    limit dates
-)
