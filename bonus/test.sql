@@ -147,9 +147,14 @@ order by event_time desc;
 
 show processlist;
 
+select *
+from service.qwe;
+
 
 select count()
 from stage.bo
 where key_hash in stage.set_bo;
+
+
 
 
