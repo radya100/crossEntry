@@ -35,7 +35,7 @@ where key_hash in
                         (
                             select key_hash, attribute_hash
                             from stage.bo_log
-                            where key_hash in (select key_hash from stage.rule_keys where dt_where)
+                            where key_hash in (select key_hash from stage.bo_keys where dt_where)
                         )
                 )
             )
