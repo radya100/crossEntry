@@ -163,3 +163,45 @@ order by event_time desc;
 
 show processlist;
 
+
+select key_hash, count()
+from stage.bo
+where key_hash in stage.set_bo --105 097 066
+group by key_hash
+order by count() desc
+limit 100
+;
+
+select * from stage.bo where key_hash = '50200000000000016513049';
+
+
+with toDateTime('2024-08-02 11:33:01') as pb
+    , 2000000 as rows
+select greatest(max(dt_load), toDateTime('2024-08-02 11:33:01')) as maxdt
+from
+(
+    select
+        dt_load
+    from stage.bo_keys
+    where dt_load > pb
+    order by dt_load
+    limit rows
+);
+
+
+with toDateTime('2024-08-02 11:33:01') as pb
+    , 2000000 as rows
+    , 100 as dates
+select
+    *
+from stage.bo_keys
+where dt_load in
+(
+    select
+        dt_load
+    from stage.bo_keys
+    where dt_load > pb
+    group by dt_load
+    order by dt_load
+    limit dates
+)
