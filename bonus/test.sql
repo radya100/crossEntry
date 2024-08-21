@@ -148,9 +148,9 @@ where table = 'set_bo';
 select * from service.qwe; --3665535
 
 select pb, pe, formatReadableQuantity(count())
-from stage.bo_log group by pb, pe order by pb;
-
-select count(), uniqExact((bonus_id, instance_id)) from service.qwe;
+from stage.bo_log
+group by pb, pe
+order by pb;
 
 select formatReadableSize(result_bytes), *
 from system.query_log
@@ -158,7 +158,7 @@ where event_date = today()
     and user = 'airflow_user'
     and type <> 'QueryStart'
     and http_user_agent = 'curl/7.64.0'
-    and hasAny(['stage.bo_keys', 'stage.bo_log', 'stage.set_bo','service.qwe'], tables)
+    and hasAny(['stage.bo_keys', 'stage.bo_log', 'stage.set_bo','service.qwe', 'stage.bo'], tables)
 --     and query like '%bo%'
 order by event_time desc;
 

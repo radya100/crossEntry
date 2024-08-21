@@ -4,7 +4,7 @@ cd /etc/bash_etl/crossEntry/bonus/ || return
 source $1
 export url="http://$user:$password@$host:8123"
 export url2="$url?query=insert%20into%20service.qwe%20format%20Values"
-export rows=200000
+export rows=2000000
 if [ -f $state_file ]; then
         export pb=$(<$state_file)
 else
