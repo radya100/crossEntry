@@ -1,0 +1,4 @@
+host=10.66.41.114
+user=airflow_user
+password="FRXYwG8yPo2t"
+state_file="./santa.mli"

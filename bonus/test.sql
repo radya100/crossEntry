@@ -132,8 +132,17 @@ where table = 'set_bo';
 
 select pb, pe, formatReadableQuantity(count())
 from stage.bo_log
-group by pb, pe
+group by pb, pe with rollup
 order by pb desc;
+
+select
+    formatReadableQuantity(count())
+    , formatReadableQuantity(uniq(key_hash))
+    , formatReadableQuantity(uniq((key_hash, attribute_hash)))
+from stage.bo_log
+limit 1;
+
+optimize table stage.bo_log deduplicate by *, dt_load;
 
 select formatReadableSize(result_bytes), *
 from system.query_log
