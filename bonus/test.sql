@@ -166,16 +166,33 @@ where key_hash in stage.set_bo;
 
 select
     table
-    , formatReadableSize(sum(bytes_on_disk))
+    , formatReadableSize(sum(bytes_on_disk)) as bytes
+    , formatReadableQuantity(sum(rows)) as row
 from system.parts
 where database = 'stage'
     and table in ('bo_keys', 'bo_log')
     and active
 group by table;
 
+optimize table stage.bo_keys final deduplicate by key_hash,related_hash,attribute_hash,source_table,ym;
 optimize table stage.bo_log final deduplicate by key_hash,attribute_hash, ym;
 
-select count() from stage.bo_log
+select count() from stage.bo_log;
+
+
+with
+    toDateTime('2024-08-03 23:34:47') as pb
+    , 2000000 as rows
+select greatest(max(dt_load), toDateTime('2024-08-03 23:34:47')) as maxdt
+from
+(
+    select
+        dt_load
+    from stage.bo_keys
+    where dt_load > pb
+    order by dt_load
+    limit rows
+);
 
 
 

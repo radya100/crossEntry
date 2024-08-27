@@ -14,7 +14,11 @@ export pe_query=$(cat ./get_pe_where_rows.sql | sed "s/__pb__/$pb/g" | sed "s/__
 export pe=$(echo $pe_query | curl $url -sS -d @-)
 
 #prepare set for fill
-echo $(cat ./data_prepare_keys.sql | sed "s/__pb__/$pb/g" | sed "s/__pe__/$pe/") | curl $url -sS -d @-
+export msg_create_set=$(echo $(cat ./data_prepare_keys.sql | sed "s/__pb__/$pb/g" | sed "s/__pe__/$pe/") | curl --write-out '%{http_code}' --output /dev/null --silent $url -d @-)
+if [[ $msg -ne "200" ]]; then
+       echo "Error create set" 1>&2
+       exit 64;
+fi
 
 #calculate showcase
 export msg=$(echo $(<./data_select.sql) | curl $url -sS -d @- | curl --write-out '%{http_code}' --output /dev/null --silent $url2 -d @-)
