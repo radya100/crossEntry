@@ -15,7 +15,7 @@ export pe=$(echo $pe_query | curl $url -sS -d @-)
 
 #prepare set for fill
 export msg_create_set=$(echo $(cat ./data_prepare_keys.sql | sed "s/__pb__/$pb/g" | sed "s/__pe__/$pe/") | curl --write-out '%{http_code}' --output /dev/null --silent $url -d @-)
-if [[ $msg -ne "200" ]]; then
+if [[ $msg_create_set -ne "200" ]]; then
        echo "Error create set" 1>&2
        exit 64;
 fi
