@@ -142,8 +142,6 @@ select
 from stage.bo_log
 limit 1;
 
-optimize table stage.bo_log deduplicate by *, dt_load;
-
 select formatReadableSize(result_bytes), *
 from system.query_log
 where event_date = today()
@@ -155,19 +153,6 @@ where event_date = today()
 order by event_time desc;
 
 show processlist;
-
-with toDateTime('2024-08-27 00:00:00') as pb, 2000000 as rows
--- select greatest(max(dt_load), toDateTime('2024-08-27 00:00:00')) as maxdt from (
-    select dt_load from stage.bo_keys where dt_load > pb order by dt_load limit rows
---     );
-
-select toStartOfHour(dt_load) as dt_load, count()
-from stage.bo_keys
-where toDate(dt_load) = today()
-group by dt_load
-order by dt_load;
-
-
 
 select count()
 from stage.bo
