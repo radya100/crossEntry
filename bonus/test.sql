@@ -132,7 +132,7 @@ where table = 'set_bo';
 
 select pb, pe, formatReadableQuantity(count())
 from stage.bo_log
-group by pb, pe with rollup
+group by pb, pe
 order by pb desc;
 
 select
@@ -150,7 +150,7 @@ where event_date = today()
     and http_user_agent = 'curl/7.64.0'
     and hasAny(['stage.bo_keys', 'stage.bo_log', 'stage.set_bo','service.qwe', 'stage.bo'], tables)
 --     and query like '%bo%'
-order by event_time desc;
+order by event_time_microseconds desc;
 
 show processlist;
 
@@ -188,6 +188,7 @@ from
     limit rows
 );
 
+show create stage.bo_values
 
 
 

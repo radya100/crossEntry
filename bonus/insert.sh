@@ -4,7 +4,7 @@ cd /etc/bash_etl/crossEntry/bonus/ || return
 source $1
 export url="http://$user:$password@$host:8123"
 export url2="$url?query=insert%20into%20service.qwe%20format%20Values"
-export rows=20000
+export rows=200000
 if [ -f $state_file ]; then
         export pb=$(<$state_file)
 else
@@ -20,7 +20,7 @@ if [[ $msg_create_set -ne "200" ]]; then
        exit 64;
 fi
 
-export msg_create_val=$(echo $(cat ./data_prepare_values.sql) | curl --write-out '%{http_code}' --output /dev/null --silent $url -d @-)
+export msg_create_val=$(echo $(<./data_prepare_values.sql) | curl --write-out '%{http_code}' --output /dev/null --silent $url -d @-)
 if [[ msg_create_val -ne "200" ]]; then
        echo "Error create values" 1>&2
        exit 64;
