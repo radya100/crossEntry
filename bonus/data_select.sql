@@ -1,15 +1,3 @@
-with rs as
-(
-    select
-        (argMaxIf(tuple(* except (key_hash, is_del, last_version), dt_load), last_version, not is_del) as tup).1 as instance_id
-        , tup.2 as source_table
-        , tup
-        , argMax(is_del, last_version) as del
-    from stage.bo
-    where key_hash in stage.set_bo
-    group by key_hash
-    having instance_id and (source_table in (5, 6) or del = 0)
-)
 select
     cityHash64() as b_instance_hash
     , s1.instance_id as instance_id
@@ -57,7 +45,7 @@ from
         , tup.19 as chequeitem_id
         , instance_id
         , del
-    from rs
+    from stage.bo_values
     where source_table in (5, 6)
 ) as s1
 any left join
@@ -66,7 +54,7 @@ any left join
         tup.26 as cheque_id
         , (tup.27, tup.28, tup.29, tup.30, tup.31) as tup_ch
         , instance_id
-    from rs
+    from stage.bo_values
     where source_table = 2
 ) as s2 on s2.cheque_id = s1.cheque_id and s2.instance_id = s1.instance_id
 any left join
@@ -75,7 +63,7 @@ any left join
         tup.19 as chequeitem_id
         , instance_id
         , (tup.20, tup.21 , tup.22, tup.23, tup.31) as tup_ci
-    from rs
+    from stage.bo_values
     where source_table = 1
 ) as s3 on s3.chequeitem_id = s1.chequeitem_id and  s3.instance_id = s1.instance_id
 any left join
@@ -84,7 +72,7 @@ any left join
         tup.19 as chequeitem_id
         , instance_id
         , groupArray((tup.24, tup.25, tup.31)) as tup_ea
-    from rs
+    from stage.bo_values
     where source_table = 3
     group by chequeitem_id, instance_id
 ) as s4 on s4.chequeitem_id = s1.chequeitem_id and  s4.instance_id = s1.instance_id

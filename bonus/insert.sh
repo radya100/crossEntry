@@ -20,6 +20,13 @@ if [[ $msg_create_set -ne "200" ]]; then
        exit 64;
 fi
 
+export msg_create_val=$(echo $(cat ./data_prepare_values.sql) | curl --write-out '%{http_code}' --output /dev/null --silent $url -d @-)
+if [[ msg_create_val -ne "200" ]]; then
+       echo "Error create values" 1>&2
+       exit 64;
+fi
+
+
 #calculate showcase
 export msg=$(echo $(<./data_select.sql) | curl $url -sS -d @- | curl --write-out '%{http_code}' --output /dev/null --silent $url2 -d @-)
 
