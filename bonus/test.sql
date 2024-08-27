@@ -164,6 +164,18 @@ select count()
 from stage.bo
 where key_hash in stage.set_bo;
 
+select
+    table
+    , formatReadableSize(sum(bytes_on_disk))
+from system.parts
+where database = 'stage'
+    and table in ('bo_keys', 'bo_log')
+    and active
+group by table;
+
+optimize table stage.bo_log final deduplicate by key_hash,attribute_hash, ym;
+
+select count() from stage.bo_log
 
 
 

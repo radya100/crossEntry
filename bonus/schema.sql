@@ -50,21 +50,23 @@ create table stage.bo_keys on cluster basic
     key_hash UInt128
     , related_hash UInt128
     , attribute_hash UInt64 codec(ZSTD(3))
-    , source_table UInt8
-    , dt_load DateTime materialized now()
+    , source_table UInt8 codec(DoubleDelta, ZSTD(3))
+    , dt_load DateTime materialized now() codec(DoubleDelta, ZSTD(3))
+    , ym Int32 materialized toYYYYMM(now()) codec(DoubleDelta, ZSTD(3))
 ) engine = ReplicatedMergeTree('/clickhouse/tables/{shard}/stage_bo_keys', '{replica}')
-partition by toYYYYMM(dt_load)
+partition by ym
 order by (key_hash);
 
 create table stage.bo_log on cluster basic
 (
     key_hash UInt128
     , attribute_hash UInt64 codec(ZSTD(3))
-    , pb DateTime
-    , pe DateTime
-    , dt_load DateTime materialized now()
+    , pb DateTime codec(DoubleDelta, ZSTD(3))
+    , pe DateTime codec(DoubleDelta, ZSTD(3))
+    , dt_load DateTime materialized now() codec(DoubleDelta, ZSTD(3))
+    , ym Int32 materialized toYYYYMM(now()) codec(DoubleDelta, ZSTD(3))
 ) engine = ReplicatedMergeTree('/clickhouse/tables/{shard}/stage_bo_log', '{replica}')
-partition by toYYYYMM(dt_load)
+partition by ym
 order by (key_hash);
 
 
