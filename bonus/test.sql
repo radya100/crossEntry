@@ -181,7 +181,7 @@ select count() from stage.bo_log;
 
 
 with
-    toDateTime('2024-08-03 23:34:47') as pb
+    toDateTime('2024-08-26 16:17:46') as pb
     , 2000000 as rows
 select greatest(max(dt_load), toDateTime('2024-08-03 23:34:47')) as maxdt
 from
