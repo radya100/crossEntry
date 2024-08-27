@@ -156,8 +156,17 @@ order by event_time desc;
 
 show processlist;
 
-select *
-from service.qwe;
+with toDateTime('2024-08-27 00:00:00') as pb, 2000000 as rows
+-- select greatest(max(dt_load), toDateTime('2024-08-27 00:00:00')) as maxdt from (
+    select dt_load from stage.bo_keys where dt_load > pb order by dt_load limit rows
+--     );
+
+select toStartOfHour(dt_load) as dt_load, count()
+from stage.bo_keys
+where toDate(dt_load) = today()
+group by dt_load
+order by dt_load;
+
 
 
 select count()
@@ -194,5 +203,30 @@ from
     limit rows
 );
 
+
+create
+or
+replace
+table stage.set_bo engine = Set () as
+with toDateTime('2024-08-27 00:00:00') as pb, toDateTime('2024-08-27 02:16:55') as pe, dt_load between pb and pe as dt_where
+select arrayJoin([key_hash, related_hash]) as key_hash
+from stage.bo_keys
+where key_hash in (select arrayJoin([key_hash, related_hash])
+                   from stage.bo_keys
+                   where key_hash in (select arrayJoin([key_hash, related_hash])
+                                      from stage.bo_keys
+                                      where key_hash in (select arrayJoin([key_hash, related_hash])
+                                                         from stage.bo_keys
+                                                         where key_hash in (select arrayJoin([key_hash, related_hash])
+                                                                            from stage.bo_keys
+                                                                            where key_hash in
+                                                                                  (select arrayJoin([key_hash, related_hash])
+                                                                                   from stage.bo_keys
+                                                                                   where dt_where
+                                                                                     and (key_hash,
+                                                                                          attribute_hash) not in
+                                                                                         (select key_hash, attribute_hash
+                                                                                          from stage.bo_log
+                                                                                          where key_hash in (select key_hash from stage.bo_keys where dt_where)))))));
 
 
