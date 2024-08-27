@@ -148,7 +148,7 @@ where event_date = today()
     and user = 'airflow_user'
     and type <> 'QueryStart'
     and http_user_agent = 'curl/7.64.0'
-    and hasAny(['stage.bo_keys', 'stage.bo_log', 'stage.set_bo','service.qwe', 'stage.bo'], tables)
+    and hasAny(['stage.bo_keys', 'stage.bo_log', 'stage.set_bo','service.qwe', 'stage.bo', 'stage.bo_values'], tables)
 order by event_time_microseconds desc;
 
 show processlist;
