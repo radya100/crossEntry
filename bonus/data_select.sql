@@ -56,6 +56,7 @@ any left join
         , instance_id
     from stage.bo_values
     where source_table = 2
+        and cheque_id <> 0
 ) as s2 on s2.cheque_id = s1.cheque_id and s2.instance_id = s1.instance_id
 any left join
 (
@@ -65,6 +66,7 @@ any left join
         , (tup.20, tup.21 , tup.22, tup.23, tup.31) as tup_ci
     from stage.bo_values
     where source_table = 1
+        and chequeitem_id <> 0
 ) as s3 on s3.chequeitem_id = s1.chequeitem_id and  s3.instance_id = s1.instance_id
 any left join
 (
@@ -74,6 +76,7 @@ any left join
         , groupArray((tup.24, tup.25, tup.31)) as tup_ea
     from stage.bo_values
     where source_table = 3
+        and chequeitem_id <> 0
     group by chequeitem_id, instance_id
 ) as s4 on s4.chequeitem_id = s1.chequeitem_id and  s4.instance_id = s1.instance_id
 format Values
