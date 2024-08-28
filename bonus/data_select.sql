@@ -1,5 +1,5 @@
 select
-    cityHash64() as b_instance_hash
+    cityHash64(bonus_id, instance_id) as b_instance_hash
     , s1.instance_id as instance_id
     , s1.tup.4 as bonus_id
     , s1.tup.6 as organization_id
@@ -76,4 +76,4 @@ any left join
     where source_table = 3
     group by chequeitem_id, instance_id
 ) as s4 on s4.chequeitem_id = s1.chequeitem_id and  s4.instance_id = s1.instance_id
-format Values
+-- format Values

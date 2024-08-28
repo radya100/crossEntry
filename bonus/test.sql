@@ -8,6 +8,8 @@ where database = 'stage'
 order by position;
 --добавил коммент
 
+show create dwh.bonus_slim_daily;
+
 insert into dwh.bonus_slim_daily
 (    b_instance_hash,instance_id,bonus_id,organization_id,source_table,is_delete,value,dt_created,parent_type_id,parent_id,rule_id,campaign_id,is_status,oper_type,chequeitem_id,article_id
     ,ea_ci,cheque_id,shop_id,card_id,card_hash,is_order,credit_bonus_id,dt_start_date,dt_finish_date,remainder,dt_load,cheque_summ,cheque_summdiscounted,tenant_id,ci_quantity,ci_summ,ci_summdiscounted)
@@ -125,6 +127,9 @@ allow_aggregate_partitions_independently =1,
 force_aggregate_partitions_independently =1,
 enable_writes_to_query_cache = false;
 
+select * from system.tables where create_table_query like '%stage_bonus%';
+show create null.mv_to_stage_bonus_from_;
+
 
 select formatReadableSize(total_bytes), * from system.tables
 where table = 'set_bo';
@@ -187,7 +192,9 @@ from
     limit rows
 );
 
-show create stage.bo_values
+select * from service.qwe where toDate(dt_load) = today()
+    and shop_id = 0
+limit 100
 
 
 

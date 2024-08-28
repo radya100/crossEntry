@@ -18,15 +18,21 @@ where key_hash in
         from stage.bo_keys
         where key_hash in
         (
-            select arrayJoin([key_hash, related_hash])
+            select
+                arrayJoin([key_hash, related_hash])
             from stage.bo_keys
-            where dt_where
-                and (key_hash, attribute_hash) not in
-                (
-                    select key_hash, attribute_hash
-                    from stage.bo_log
-                    where key_hash in (select key_hash from stage.bo_keys where dt_where)
-                )
+            where key_hash in
+            (
+                select arrayJoin([key_hash, related_hash])
+                from stage.bo_keys
+                where dt_where
+                    and (key_hash, attribute_hash) not in
+                    (
+                        select key_hash, attribute_hash
+                        from stage.bo_log
+                        where key_hash in (select key_hash from stage.bo_keys where dt_where)
+                    )
+            )
         )
     )
 );
