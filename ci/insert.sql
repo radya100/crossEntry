@@ -1,4 +1,4 @@
-insert into dwh.chequeitems_daily
+insert into dwh.chequeitems_retro
 with
     toDateTime('__pb__') as pb
     , toDateTime('__pe__') as pe
