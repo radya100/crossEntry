@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 cd /etc/bash_etl/crossEntry/rule/
 source ../kim.conn
