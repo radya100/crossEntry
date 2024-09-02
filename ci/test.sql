@@ -241,14 +241,23 @@ group by tenant_id
 order by tenant_id;
 
 
+select formatReadableSize(result_bytes), *
+from system.query_log
+where event_date = today()
+    and user = 'airflow_user'
+    and type <> 'QueryStart'
+    and http_user_agent = 'curl/7.64.0'
+    and hasAny(['service.ci_keys', 'service.ci', 'service.ci_log'], tables)
+order by event_time_microseconds desc;
+
+
 select
     d
-    , instance_id
-    , formatReadableQuantity(count()) as qty
-    , formatReadableQuantity(sum(summdisc)/100) as summdisc
+--     , toDateTime(max(dt), 'UTC') as mdt
+    , max(dt_load)
+    , tenant_id
+    , count()
 from dwh.chequeitems_retro
-where d in ('2024-07-09', '2024-07-10', '2024-07-12', '2024-07-14', '2024-07-19', '2024-07-20')
-    and instance_id = 13
-group by d, instance_id
-order by instance_id, d;
-
+where d between today() - 1 and today()
+group by tenant_id, d
+order by tenant_id, d
