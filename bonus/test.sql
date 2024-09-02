@@ -153,8 +153,8 @@ where event_date = today()
     and user = 'airflow_user'
     and type <> 'QueryStart'
     and http_user_agent = 'curl/7.64.0'
-    and hasAny(['stage.bo_keys', 'stage.bo_log', 'stage.set_bo','service.qwe', 'stage.bo', 'stage.bo_values'], tables)
---     and hasAny(['stage.bo_log'], tables)
+--     and hasAny(['stage.bo_keys', 'stage.bo_log', 'stage.set_bo','service.qwe', 'stage.bo', 'stage.bo_values'], tables)
+    and hasAny(['stage.bo_log'], tables)
 order by event_time_microseconds desc;
 
 with toDateTime('2024-08-27 22:05:22') as pb , 400000 as rows select greatest((groupArray((dt_load, q)) as w)[arrayLastIndex(y -> y < rows, arrayCumSum(x -> x.2, w)) as i].1, pb) as maxdt from ( select dt_load, count() as q from stage.bo_keys where dt_load > pb group by dt_load order by dt_load limit rows/10 )
