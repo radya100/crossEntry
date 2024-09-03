@@ -2,7 +2,7 @@ create or replace table stage.set_bo engine = Set() as
 with
     toDateTime('__pb__') as pb
     , toDateTime('__pe__') as pe
-    , dt_load between pb and pe as dt_where
+    , dt_load > pb and dt_load <= pe as dt_where
 select
     arrayJoin([key_hash, related_hash]) as key_hash
 from stage.bo_keys
