@@ -153,8 +153,8 @@ where event_date = today()
     and user = 'airflow_user'
     and type <> 'QueryStart'
     and http_user_agent = 'curl/7.64.0'
---     and hasAny(['stage.bo_keys', 'stage.bo_log', 'stage.set_bo','service.qwe', 'stage.bo', 'stage.bo_values'], tables)
-    and hasAny(['stage.bo_log'], tables)
+    and hasAny(['stage.bo_keys', 'stage.bo_log', 'stage.set_bo','service.qwe', 'stage.bo', 'stage.bo_values'], tables)
+--     and hasAny(['stage.bo_log'], tables)
 order by event_time_microseconds desc;
 
 with toDateTime('2024-08-27 22:05:22') as pb , 400000 as rows select greatest((groupArray((dt_load, q)) as w)[arrayLastIndex(y -> y < rows, arrayCumSum(x -> x.2, w)) as i].1, pb) as maxdt from ( select dt_load, count() as q from stage.bo_keys where dt_load > pb group by dt_load order by dt_load limit rows/10 )
@@ -181,75 +181,6 @@ optimize table stage.bo_log final deduplicate by key_hash,attribute_hash, ym;
 select count() from stage.bo_log;
 
 
-with
-    toDateTime('2024-08-26 16:17:46') as pb
-    , 2000000 as rows
-select greatest(max(dt_load), toDateTime('2024-08-03 23:34:47')) as maxdt
-from
-(
-    select
-        dt_load
-    from stage.bo_keys
-    where dt_load > pb
-    order by dt_load
-    limit rows
-);
-
-select * from service.qwe
-where 1=1
---     and toDate(dt_load) = today()
-    and shop_id = 0
---     and ea_ci > []
-    and chequeitem_id = 0
-limit 500;
-
-select *
-    from dwh.bonus_slim_daily
-        where shop_id = 0;
 
 
-
-show processlist ;
-CREATE TABLE service.qwe
-(
-    `b_instance_hash` UInt64,
-    `instance_id` UInt16,
-    `bonus_id` Int64,
-    `organization_id` Int32,
-    `source_table` UInt8,
-    `is_delete` UInt8,
-    `value` Int64,
-    `dt_created` DateTime('UTC'),
-    `parent_type_id` Int32,
-    `parent_id` Int64,
-    `rule_id` Int32,
-    `rule_instance_hash` UInt64,
-    `campaign_id` Int32,
-    `campaign_instance_hash` UInt64,
-    `is_status` UInt8,
-    `oper_type` LowCardinality(String),
-    `chequeitem_id` Int64,
-    `article_id` Int32,
-    `article_instance_hash` UInt64,
-    `ea_ci` Array(Tuple(String, String)),
-    `cheque_id` Int64,
-    `shop_id` Int32,
-    `shop_instance_hash` UInt64,
-    `tenant_id` UInt16,
-    `card_id` Int32,
-    `card_hash` UInt64,
-    `card_instance_hash` UInt64,
-    `is_order` UInt8,
-    `credit_bonus_id` Int64,
-    `dt_start_date` DateTime('UTC'),
-    `dt_finish_date` DateTime('UTC'),
-    `remainder` Int64,
-    `dt_load` DateTime,
-    `cheque_summ` Int64,
-    `cheque_summdiscounted` Int64,
-    `ci_quantity` Int64,
-    `ci_summ` Int64,
-    `ci_summdiscounted` Int64
-)
-ENGINE = Log;
 
