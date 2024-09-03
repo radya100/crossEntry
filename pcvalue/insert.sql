@@ -2,7 +2,7 @@ insert into dwh.pcvalue_retro
 with
     toDateTime('__pb__') as pb
     , toDateTime('__pe__') as pe
-    , dt_load between pb and pe as dt_where
+    , dt_load > pb and dt_load <= pe as dt_where
     , rs as
     (
         select
