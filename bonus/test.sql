@@ -1,5 +1,5 @@
 --===Сходимость по кол-ву записей и сумме скидки
-with (toDate(dt_created) = '2024-08-30') as d_where
+with (toDate(dt_created) = '2024-09-01') as d_where
 select
     tenant_id
     , anyIf(qty, sou = 'new') as new
@@ -30,11 +30,12 @@ order by tenant_id;
 
 --== Результат работы скриптов - с временем выполнения полного цикла загрузки
 select
-    (arrayJoin(arrayMap(x -> (ar[x].1, ar[x].2, ar[x].3, ar[x].4, ar[x].4 - ar[x+1].4), arrayEnumerate(groupArray(t) as ar))) as aj).1 as pb
+    (arrayJoin(arrayMap(x -> (ar[x].1, ar[x].2, ar[x].3, ar[x].4, ar[x].4 - ar[x+1].4, ar[x].5), arrayEnumerate(groupArray(t) as ar))) as aj).1 as pb
     , aj.2 as pe
     , aj.3 as type
     , aj.4 as time
     , formatReadableTimeDelta(aj.5) as sec
+    , formatReadableQuantity(aj.6) as rows
 from
 (
     select tuple
@@ -43,6 +44,7 @@ from
             , substring(q[3], 3, 19) as pe
             , type
             , event_time
+            , written_rows
         ) as t
     from system.query_log
     where event_date = today()
@@ -55,7 +57,7 @@ from
 
 
 --==== Кверилог выполнения
-select formatReadableSize(result_bytes) as bytes
+select formatReadableQuantity(written_rows) as rows
     , type
     , event_time
     , query
@@ -70,11 +72,12 @@ order by event_time_microseconds desc;
 
 --=== Штука , которая позволяет оценить необходимость дедубликации
 select
-    formatReadableQuantity(count())
-    , formatReadableQuantity(uniq(key_hash))
+    ym
+    , formatReadableQuantity(count())
     , formatReadableQuantity(uniq((key_hash, attribute_hash, ym)))
-from stage.bo_log;
-optimize table stage.bo_log final deduplicate by key_hash,attribute_hash, ym;
+from stage.bo_log
+group by ym order by ym desc;
+optimize table stage.bo_log partition 202409 final deduplicate by key_hash,attribute_hash, ym;
 
 --=== Сколько входных данных было обработано
 select pb, pe, formatReadableQuantity(count())

@@ -65,11 +65,10 @@ create table stage.bo_log on cluster basic
     , pe DateTime codec(DoubleDelta, ZSTD(3))
     , dt_load DateTime materialized now() codec(DoubleDelta, ZSTD(3))
     , ym Int32 materialized toYYYYMM(now()) codec(DoubleDelta, ZSTD(3))
-) engine = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/stage_bo_log', '{replica}')
+) engine = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/stage_bo_log_2', '{replica}')
 partition by ym
 order by (key_hash, attribute_hash)
 primary key key_hash;
-
 
 
 -->> BO
